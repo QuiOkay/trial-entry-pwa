@@ -1,0 +1,10 @@
+{
+  "name": "Trial Entry (Spike A)",
+  "short_name": "Trial Entry",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f8",
+  "theme_color": "#028090",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
