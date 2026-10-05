@@ -2,11 +2,12 @@
 /* global Outbox */
 importScripts('outbox.js');
 
-const SHELL = 'spikeA-shell-v3';
+const SHELL = 'entry-shell-v3';   // bump on every release, or installed apps keep the old files
 const FILES = ['./', 'index.html', 'app.js', 'outbox.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(SHELL).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
+  // no skipWaiting here: the page shows "New version" and the user taps Update (sends 'skip-waiting')
+  e.waitUntil(caches.open(SHELL).then(function (c) { return c.addAll(FILES); }));
 });
 
 self.addEventListener('activate', function (e) {
@@ -14,6 +15,8 @@ self.addEventListener('activate', function (e) {
     return Promise.all(keys.filter(function (k) { return k !== SHELL; }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
+
+self.addEventListener('message', function (e) { if (e.data && e.data.type === 'skip-waiting') self.skipWaiting(); });
 
 // Same-origin GET: cache first (app opens with no signal). Everything else: straight to network.
 self.addEventListener('fetch', function (e) {

@@ -2,90 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trial Entry (Spike A)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trial Entry</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#028090">
 <style>
-  :root { --fg:#1d2327; --muted:#5f6b72; --bg:#f6f7f8; --card:#fff; --line:#d8dde0; --brand:#028090; --bad:#c00000; --ok:#2e7d32; --warn:#b26a00; }
+  :root { --fg:#1d2327; --muted:#5f6b72; --bg:#f6f7f8; --card:#fff; --line:#d8dde0; --brand:#028090; --bad:#c00000; --ok:#2e7d32; --warn:#b26a00; --pend:#fff4d6; }
   * { box-sizing: border-box; }
   body { margin:0; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--fg); background:var(--bg); }
-  header { position:sticky; top:0; background:var(--brand); color:#fff; padding:10px 16px; display:flex; gap:8px; align-items:center; z-index:1; }
-  header h1 { font-size:17px; margin:0; flex:1; }
-  .pill { font-size:12px; padding:3px 8px; border-radius:999px; background:rgba(255,255,255,.2); white-space:nowrap; }
+  header { position:sticky; top:0; background:var(--brand); color:#fff; padding:8px 12px; display:flex; gap:6px; align-items:center; z-index:2; }
+  header h1 { font-size:16px; margin:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pill { font-size:12px; padding:3px 8px; border-radius:999px; background:rgba(255,255,255,.22); white-space:nowrap; }
   .pill.off { background:var(--bad); }
-  main { padding:12px 16px 40px; max-width:640px; margin:0 auto; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:12px; }
-  h2 { font-size:15px; margin:0 0 8px; }
+  nav { display:flex; overflow-x:auto; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:40px; z-index:1; }
+  nav button { flex:1 0 auto; background:none; color:var(--muted); border:0; border-bottom:3px solid transparent; padding:8px 10px; margin:0; width:auto; font-size:13px; font-weight:600; border-radius:0; }
+  nav button.on { color:var(--brand); border-bottom-color:var(--brand); }
+  nav button small { display:block; font-weight:400; font-size:11px; }
+  main { padding:10px 12px 60px; max-width:720px; margin:0 auto; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:10px; }
+  h2 { font-size:15px; margin:0 0 8px; } h2 small, label small, th small { display:block; font-weight:400; color:var(--muted); font-size:12px; }
   label { display:block; font-size:13px; color:var(--muted); margin:8px 0 2px; }
-  input, select, button { font:inherit; width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--fg); }
+  input, select, button, textarea { font:inherit; width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--fg); }
+  input.pend { background:var(--pend); }
+  input:focus, select:focus { outline:2px solid #9ad1d8; }
   button { background:var(--brand); color:#fff; border:0; font-weight:600; margin-top:10px; cursor:pointer; }
   button.secondary { background:#e9eef0; color:var(--fg); }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; } .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   .msg { font-size:13px; margin-top:8px; min-height:1.2em; word-break:break-word; }
   .msg.bad { color:var(--bad); } .msg.ok { color:var(--ok); } .msg.warn { color:var(--warn); }
-  table { width:100%; border-collapse:collapse; font-size:12px; }
-  td, th { border-bottom:1px solid var(--line); padding:4px; text-align:left; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  td, th { border-bottom:1px solid var(--line); padding:5px 4px; text-align:left; vertical-align:middle; }
+  th { font-size:12px; color:var(--muted); font-weight:600; }
+  td input { padding:7px; } td.n { width:92px; } td.c { width:44px; text-align:center; } td input[type=checkbox] { width:22px; height:22px; }
+  .sub { font-size:12px; color:var(--muted); }
   details summary { cursor:pointer; font-weight:600; font-size:15px; }
   .kv { font-size:12px; color:var(--muted); white-space:pre-wrap; }
+  .banner { background:#fff4d6; border:1px solid #e0b400; padding:8px 10px; border-radius:8px; margin-bottom:10px; font-size:14px; }
+  .banner button { margin-top:6px; }
+  .hide { display:none; }
+  .tagrow { display:grid; grid-template-columns:1.3fr 1fr auto; gap:6px; align-items:end; } .tagrow button { width:auto; margin:0; padding:9px 14px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Trial Entry · Spike A</h1>
+  <h1 id="title">Trial Entry</h1>
   <span id="net" class="pill">…</span>
   <span id="queue" class="pill">queue 0</span>
 </header>
+<nav id="nav"></nav>
 <main>
-  <section>
-    <h2>Record (D_Sow_Daily)</h2>
-    <div class="row">
-      <div><label for="sow">Sow ID</label><input id="sow" list="sows" value="S001" autocomplete="off"></div>
-      <div><label for="day">Day</label><input id="day" type="number" inputmode="numeric" value="1" min="0" max="28"></div>
-    </div>
-    <label for="field">Field</label>
-    <select id="field">
-      <option value="feed_0700">Feed 07:00 (kg)</option>
-      <option value="feed_1000">Feed 10:00 (kg)</option>
-      <option value="feed_1400">Feed 14:00 (kg)</option>
-      <option value="feed_1630">Feed 16:30 (kg)</option>
-      <option value="feed_2100">Feed 21:00 (kg)</option>
-      <option value="sow_health">Sow health</option>
-      <option value="note">Note</option>
-    </select>
-    <label for="value">Value <span id="hint">(blank = not recorded, 0 = recorded zero)</span></label>
-    <input id="value" inputmode="decimal" autocomplete="off">
-    <button id="save">Save</button>
-    <div id="saveMsg" class="msg"></div>
-    <datalist id="sows"><option value="S001"><option value="S002"></datalist>
-  </section>
-
-  <section>
-    <h2>Sync</h2>
-    <button id="syncNow" class="secondary">Sync now</button>
-    <div id="syncMsg" class="msg"></div>
-    <div id="caps" class="kv"></div>
-  </section>
-
-  <section>
-    <details id="queueBox"><summary>Waiting to send (<span id="qn">0</span>)</summary><table id="qt"></table></details>
-  </section>
-  <section>
-    <details><summary>Rejected by server (<span id="rn">0</span>)</summary><table id="rt"></table>
-      <button id="clearRej" class="secondary">Clear rejected list</button></details>
-  </section>
-
-  <section>
-    <details id="setBox"><summary>Settings</summary>
-      <label for="endpoint">Endpoint URL (Apps Script /exec)</label><input id="endpoint" autocomplete="off" spellcheck="false">
-      <label for="code">Access code</label><input id="code" autocomplete="off" spellcheck="false">
-      <label for="device">Device name</label><input id="device" autocomplete="off">
-      <button id="saveSet">Save settings</button>
-      <button id="test" class="secondary">Test connection</button>
-      <div id="setMsg" class="msg"></div>
-    </details>
-  </section>
+  <div id="update" class="banner hide">New version available. <small>Có bản mới.</small><button id="doUpdate">Update now / Cập nhật</button></div>
+  <div id="flash" class="msg"></div>
+  <div id="rosterInfo" class="sub"></div>
+  <div id="screen"></div>
 </main>
 <script src="outbox.js"></script>
 <script src="app.js"></script>

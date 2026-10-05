@@ -7,7 +7,7 @@
   const DB_VERSION = 1;
   const BATCH = 50;          // must be <= SPIKE.MAX_RECORDS in Code.gs
   const MAX_ROUNDS = 20;     // per sync call
-  const AUTH_ERRORS = ['bad_code', 'revoked', 'role_cannot_write', 'too_many_attempts'];
+  const AUTH_ERRORS = ['bad_code', 'revoked', 'role_cannot_write', 'too_many_attempts', 'no_access', 'unknown_trial'];
 
   let dbp = null;
   function db() {
@@ -89,15 +89,16 @@
   async function doSync(why) {
     const endpoint = await Outbox.getSetting('endpoint');
     const code = await Outbox.getSetting('code');
+    const trial = await Outbox.getSetting('trial');
     const device = (await Outbox.getSetting('device')) || 'unnamed';
-    if (!endpoint || !code) return note({ state: 'not_configured', why: why });
+    if (!endpoint || !code || !trial) return note({ state: 'not_configured', why: why });
 
     const total = { written: 0, duplicate: 0, rejected: 0, unanswered: 0, requests: 0, rtt_ms: [], server_ms: [] };
     for (let round = 0; round < MAX_ROUNDS; round++) {
       const batch = await Outbox.list('outbox', BATCH);
       if (!batch.length) break;
       const body = JSON.stringify({
-        v: 1, action: 'write', code: code, device: device,
+        v: 2, action: 'write', code: code, device: device, trial: trial,
         records: batch.map(function (r) { const c = Object.assign({}, r); delete c.seq; return c; }),
       });
       const t0 = Date.now();
@@ -135,6 +136,20 @@
     try { await Outbox.setSetting('last_sync', result); } catch (e) { /* ignore */ }
     return result;
   }
+
+  // One request to the endpoint (ping / roster). Returns the parsed JSON, or {ok:false, error:'network'|'bad_response'}.
+  Outbox.call = async function (action) {
+    const endpoint = await Outbox.getSetting('endpoint'), code = await Outbox.getSetting('code'), trial = await Outbox.getSetting('trial');
+    const device = (await Outbox.getSetting('device')) || 'unnamed';
+    if (!endpoint || !code || !trial) return { ok: false, error: 'not_configured' };
+    let res, text;
+    try {
+      res = await fetch(endpoint, { method: 'POST', redirect: 'follow', cache: 'no-store', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ v: 2, action: action, code: code, device: device, trial: trial }) });
+      text = await res.text();
+    } catch (e) { return { ok: false, error: 'network', detail: String(e && e.message || e) }; }
+    try { return JSON.parse(text); } catch (e) { return { ok: false, error: 'bad_response', http: res.status }; }
+  };
 
   root.Outbox = Outbox;
 })(typeof self !== 'undefined' ? self : this);
